@@ -1,0 +1,350 @@
+create table members(
+ mem_id varchar(100) not null comment '아이디',
+ mem_name varchar(50) not null comment '이름',
+ mem_age int default 0 comment '나이',
+ mem_address varchar(100) null comment '주소',
+ user_yn char(1) default 'Y' comment '사용여부',
+ /*기본키 선언*/
+ primary key(mem_id)
+);
+
+select * from members;
+
+insert into members (mem_id, mem_name, mem_age, mem_address)
+values('admin','관리자',30,'코리아IT');
+
+insert into members (mem_id, mem_name, mem_age, mem_address)
+values('admin2','관리자2',30,'코리아IT');
+
+insert into members (mem_id, mem_name, mem_age, mem_address)
+values('admin3','관리자3',30,'코리아IT');
+
+
+insert into members (mem_id, mem_name, mem_age, mem_address, user_yn)
+values('admin4','관리자4',40,'코리아IT-부산', 'N');
+
+select *
+from members m
+where user_yn = 'Y'
+and mem_id = 'admin';
+
+
+
+create table employee(
+	em_id varchar(100) 		not null comment '사번',
+	em_name varchar(50) 	not null comment '이름',
+	em_birth int	  		not null comment '출생일자',
+	em_position varchar (40) not null comment '직급',
+	em_depart varchar(30) 	not null comment '부서',
+	em_salary int			default 0 comment '월급',
+	reg_date datetime default now() comment '입사일',
+	leave_date datetime null comment '퇴사일',
+	primary key(em_id)
+	);
+	
+select * from employee e;
+
+insert into employee(em_id, em_name, em_birth, em_position, 
+em_depart, em_salary, reg_date)
+values ('em101', '김길동', 801010, '과장', '개발부', 4000000, '2021-10-10');
+
+insert into employee(em_id, em_name, em_birth, em_position, 
+em_depart, em_salary, reg_date)
+values ('em102', '김명수', 741010, '이사', '개발부', 5500000, '2021-10-10');
+
+insert into employee(em_id, em_name, em_birth, em_position, 
+em_depart, em_salary, reg_date)
+values ('em103', '박지혜', 981010, '과장', '기획부', 2500000, '2023-03-01');
+
+insert into employee(em_id, em_name, em_birth, em_position, 
+em_depart, em_salary, reg_date)
+values ('em104', '박민서', 821010, '부장', '기획부', 4300000, '2010-03-01');
+
+insert into employee(em_id, em_name, em_birth, em_position, 
+em_depart, em_salary, reg_date)
+values ('em105', '홍서범', 791010, '부장', '영업부', 5000000, '2009-03-01');
+
+/*컬럼을 잘못 썼을 경우 수정하는 방법(테이블, 사용자 등.. 데이터 외 수정시)*/
+
+alter table employee change column rag_date reg_date datetime;
+
+alter table employee modify column reg_date datetime comment '입사일1';
+
+/*테이블 정보 보기*/
+desc employee ;
+
+update employee
+set em_name = '고길동3',
+where em_id = 'em101';
+commit;
+
+/* rollback;
+delete from employee
+where em_id = 'em101'; */
+
+select *
+from employee e ;
+
+/* view table - 가상의 view table, 사용자가 select 한 결과를 담는 가상의 테이블*/
+/* 물리적인 view table, 자주 사용되는 select query 결과를 테이블 형태로 저장 한 물리 테이블*/
+/* 조인? = 연계(관계, relation)를 가질 수 있는 두개의 테이블을 묶어서 필요한 데이터를 추출하는 방법 */
+
+/* 일반조인 (inner join) : 두테이블의 관계를 가지게 하는 column을 매치할 경우,
+두 테이블에서 값을 모두 만족하는 데이터만 추출된다.
+가령 a 테이블과 b 테이블을 매칭하는 key가 id라고 하자, a 테이블의 id 컬럼에 3이 있고,
+b 테이블에는 없는 경우, 해당 데이터는 출력되지 않는다. */
+
+/* 아우터조인 (outer join) : 두 테이블이 관계를 맺을 때, 서로 데이터가 맞지 않더라도,
+기준이 되는 테이블의 정보는 모두 출력하는 방식
+
+Inner join예시:
+	학번		사람
+	1001	철수
+	1002	민수
+	
+	학번		학기		성적
+	1001	1		100
+	1001	2		99
+	1003	1		100
+	1003	2		88
+
+	학번		사람		학기		성적
+	1001	철수		1		100
+	1001	철수		2		99
+
+outer join 예시:
+	학번		사람
+	1001	철수
+	1002	민수
+	
+	학번		학기		성적
+	1001	1		100
+	1001	2		99
+	1003	1		100
+	1003	2		88
+
+	학번		사람		학기		성적
+	1001	철수		1		100
+	1001	철수		2		99
+	1002	민수		X		X
+
+아우터조인의 종류
+
+레프트 아우터 조인: 기준 테이블이 왼쪽에 있는 경우
+라이트 아우터 조인: 기준 테이블이 오른쪽에 있는 경우
+
+기준 테이블을 먼저 선택하고
+
+select * from 학생 k, 점수 s  == left
+select * from 점수 s, 학생 k  == right
+
+학생이 기준 테이블이기 때문에, 학생 테이블이 왼쪽에 있으니 left, 학생 테이블이 오른쪽에 있으면 right
+
+select * from 학생 k, 점수 s      = left
+where k.id = s.id(+)
+
+select * from 점수 s, 학생 k      = right
+where s.id(+) = k.id
+
+학생의 1학기 성적을 출력합시다.
+
+일반 SQL
+select * 
+from 학생 k, 점수 s
+where k.id = s.id
+	and s.학기 = 1;
+		
+ANSI SQL
+select *
+from 학생 k
+	inner join 점수 s on k.id = s.id
+where s.학기 = 1;
+
+ANSI 조인을 사용할 경우, 테이블 관계를 위한 조건과
+filter를 위한 조건이 분리된다.
+
+on 뒤에는 테이블의 관계를 위한 조건만 존재해야하며,
+filter를 위한 조건은 where 조건절을 사용한다.
+
+ANSI sql
+
+select *
+from employee e ;
+
+create table car_info(
+	com_id 	varchar(100)	not null comment'차량 code',
+	name 	varchar(50)		not null comment '차량 이름',
+	color 	varchar(30)		not null comment '색상',
+	years 	int 			not null comment '연식',
+	released varchar(20) 	not null comment '출시연도',
+	price	int				default 0 comment '가격',
+	primary key(com_id)
+)comment '차량정보';
+
+create table car_trim_info(
+	trim_id		varchar(100)	not null comment 'id',
+	com_id		varchar(100)	not null comment '차량 code',
+	trim_name	varchar(100)	not null comment '이름',
+	trim_price	int				default 0 comment '트림 별 추가 가격',
+	primary key(trim_id)	
+)comment '트림정보';
+
+create table car_options(
+	opt_id 		int 			auto_increment comment '번호',
+	trim_id		varchar(100)	not null comment 'id',
+	opt_name 	varchar(50) 	not null comment '옵션 이름',
+	opt_price	int				default 0 comment '옵션 별 추가 가격',
+	primary key(opt_id),
+	constraint opt_fk foreign key (trim_id) references car_trim_info(trim_id)
+	)comment '옵션 정보';
+	
+delete from car_info;
+insert into car_info(com_id, name, color, years, released, price)
+values('HA1001', '아반떼', '흰색', 2025, '202411', 18000000),
+('HA1002', '소나타', '검정색', 2023, '202305', 28000000),
+('HA1003', '캐스퍼', '그린', 2023, '202301', 14000000),
+('HA1004', '제네시스', '검정색', 2024, '202410', 57000000),
+('HA1005', '펠리세이드', '흰색', 2024, '202409', 39000000);
+
+insert into car_trim_info(trim_id, com_id, trim_name, trim_price)
+values 	('tr01', 'HA1001', '스마트', 4000000),
+		('tr02', 'HA1001', '모던', 6000000),
+		('tr03', 'HA1002', '익스크루시브', 4000000),
+		('tr04', 'HA1002', '인스퍼레이션', 6000000),
+		('tr05', 'HA1003', '에센셜 라이트', 1000000),
+		('tr06', 'HA1003', '인스퍼레이션', 4000000),
+		('tr07', 'HA1005', '프레스티지', 8000000);
+
+
+/*1. 모든 차량의 정보와 트림을 출력해라 (트림 정보가 없다면 출력 안해도 됨)*/
+	
+select	
+		ca.name,
+		ca.color,
+		ca.years,
+		ca.released,
+		ca.price,
+		tr.trim_name,
+		tr.trim_price
+from car_info ca
+	inner join car_trim_info tr on ca.com_id = tr.com_id ;
+	
+/*1번 출력에서 가격을 합산하여 결과를 출력하라*/
+
+select	
+		ca.name,
+		ca.color,
+		ca.years,
+		ca.released,
+		(ca.price + tr.trim_price) as price,
+		tr.trim_name	
+from car_info ca
+	inner join car_trim_info tr on ca.com_id = tr.com_id ;
+	
+/*3. 차량 출시일이 2023년 이후 인것들만 출력하시오*/
+
+select
+		ca.name,
+		ca.color,
+		ca.years,
+		ca.released,
+		(ca.price + tr.trim_price) as price,
+		tr.trim_name
+		
+from	car_info ca
+	inner join car_trim_info tr on ca.com_id = tr.com_id
+		where ca.released >= '2024';
+
+/*group by란 특성 컬럼을 기준으로 데이터를 묶는 기능, 그룹 기준 컬럼은 여러 개일 수 있다.*/
+	
+select	
+		ca.name,
+		ca.years,
+		max((ca.price + tr.trim_price)) as max_price,
+		min((ca.price + tr.trim_price)) as min_price,
+		avg((ca.price + tr.trim_price)) as avg_price
+from	car_info ca
+	inner join car_trim_info tr on ca.com_id = tr.com_id
+		where ca.released >= '2023'
+	group by ca.name, ca.years;
+
+
+/*시스템 기준으로 현재 시간을 나타낸다, 년-월-일 시분초*/
+select now();
+
+/*시간만 보고 싶다*/
+select curtime();
+
+/*날짜만 보고 싶다*/
+select current_date();
+
+/*시간, 날짜 더하기*/
+select adddate (now(), interval 7 minute); /* (second, minute, day, month, year)
+
+/*날짜 빼기*/
+select subdate(now(), interval 5 day);
+
+/*두 날짜간의 차이*/
+select datediff('2024-10-30', '2024-10-01');  /*앞이 더 커야한다*/
+
+/*두 시간의 차이*/
+select timediff('20:00:00', '17:50:00');
+
+/*시간 to string (시간을 원하는 형태의 포멧으로 변경할 때*/
+select date_format(now(), '%Y-%m-%d %H:%i:%s');
+
+/*string to 시간*/
+/*string의 시간 포멧과 동일한 포멧을 부여해야 함*/
+select str_to_date('20241010 23:10:10', '%Y%m%d %H:%i:%s');
+
+/*타임존 변경*/
+select convert_tz(now(), '+00:00', '-09:00');
+
+/*문자 관련 함수 - 문자 합치기*/
+select concat('오늘 날씨는', ' 매우 덥습니다.');
+
+/*문자 합치기 2번째 - 접착제가 있다.*/
+select concat_ws('#', '오늘 날씨는', ' 매우 덥습니다.');
+
+/*왼쪽을 기준으로 하여 문자를 정해진 크기만큼 가져온다.*/
+select left('안녕하세요 마리아디비입니다.', 5);
+
+/*오른쪽을 기준으로 하여 정해진 크기만큼 문자를 가져와 출력한다.*/
+select right('안녕하세요 마리아디비입니다.', 9);
+
+/*정해진 시작위치로부터 지정된 개수만큼 가져와 출력한다.*/
+select MID('안녕하세요 마리아디비입니다.', 6, 10); /* OFFSET, CNT*/
+
+select substring('MID와 동일한 기능을 가집니다', 1, 6);
+
+
+/*크기 byte*/
+select length ('홍길동');
+
+select char_length('홍길동');
+
+/*좌우로 원하는 만큼 원하는 문자를 넣어줌*/
+/*(대상, 자리수, 공백에 채울문자); */
+
+select '5';
+
+select lpad(5, 2, '0');
+
+select rpad(5, 2, '0');
+
+
+/*SUB query = select 된 결과를 기준으로 하여, 테이블 삼아서 다시 select를 만드는 것*/
+
+select *
+from(
+		select ca.name,
+			ca.color,
+			ca.years,
+			ca.released,
+			(ca.price + tr.trim_price) as price,
+			tr.trim_name
+		
+		from car_info ca
+			inner join car_trim_info tr on ca.com_id = tr.com_id
+		where ca.released >= '2024'
+) as sub
